@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artifact Set Reference</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Domine:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0e0f13;
+    --surface: #16181f;
+    --surface2: #1e2029;
+    --border: #2a2d3a;
+    --accent: #c8a85a;
+    --text: #e8e4d8;
+    --muted: #5a5d6e;
+    --dim: #383b4e;
+    --pri: #e8e4d8;
+    --sec: #5a5d6e;
+    --ter: #383b4e;
+    --pyro:     #2e1a14; --pyro-c:     #c8614a;
+    --hydro:    #0f1e2e; --hydro-c:    #4a8fc8;
+    --electro:  #1e1428; --electro-c:  #8f4ac8;
+    --cryo:     #0f222a; --cryo-c:     #4ab8c8;
+    --anemo:    #0f231e; --anemo-c:    #4ac8a8;
+    --geo:      #28200e; --geo-c:      #c8a84a;
+    --dendro:   #141e0f; --dendro-c:   #6ac84a;
+    --none:     #1c1e27; --none-c:     #7a7d8e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Domine', serif;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+
+  h1 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tabs { display: flex; gap: 2px; margin-bottom: 24px; }
+  .tab {
+    padding: 8px 20px;
+    font-family: 'Domine', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    border-radius: 3px;
+    user-select: none;
+  }
+  .tab.active { color: var(--accent); background: #2a2415; border-color: var(--accent); }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .set-table, .char-table { width: 100%; border-collapse: collapse; }
+  .set-table th, .char-table th {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 6px 12px 10px;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  .set-table td, .char-table td {
+    padding: 7px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid #1a1c24;
+  }
+  .set-table tr:hover td, .char-table tr:hover td { background: #13141a; }
+
+  .col-num {
+    width: 36px;
+    font-size: 0.65rem;
+    color: var(--dim);
+    text-align: right;
+    padding-right: 16px !important;
+    font-variant-numeric: tabular-nums;
+  }
+  .col-set { width: 260px; font-size: 0.82rem; color: var(--text); }
+  .col-set.virtual { color: var(--accent); font-size: 0.75rem; letter-spacing: 0.05em; }
+  .col-chars {
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+    padding-top: 8px !important; padding-bottom: 8px !important;
+  }
+
+  .char-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    position: relative;
+    cursor: default;
+    white-space: nowrap;
+    transition: filter 0.1s;
+  }
+  .char-pill:hover { filter: brightness(1.2); }
+  .char-pill[data-note]:hover::after {
+    content: attr(data-note);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .exclusive-marker {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    padding: 0 4px;
+    align-self: center;
+  }
+
+  .el-pyro    { background: var(--pyro);    border-color: var(--pyro-c);    }
+  .el-hydro   { background: var(--hydro);   border-color: var(--hydro-c);   }
+  .el-electro { background: var(--electro); border-color: var(--electro-c); }
+  .el-cryo    { background: var(--cryo);    border-color: var(--cryo-c);    }
+  .el-anemo   { background: var(--anemo);   border-color: var(--anemo-c);   }
+  .el-geo     { background: var(--geo);     border-color: var(--geo-c);     }
+  .el-dendro  { background: var(--dendro);  border-color: var(--dendro-c);  }
+  .el-none    { background: var(--none);    border-color: var(--border);    }
+
+  .p-primary   { color: var(--pri); }
+  .p-secondary { color: var(--sec); }
+  .p-tertiary  { color: var(--ter); }
+  .p-inactive  { color: var(--ter); opacity: 0.5; text-decoration: line-through; }
+
+  .col-charname { width: 160px; font-weight: 500; font-size: 0.82rem; }
+  .col-sets {
+    display: flex; flex-wrap: wrap; gap: 5px; align-items: center;
+    padding-top: 9px !important; padding-bottom: 9px !important;
+  }
+
+  .set-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    white-space: nowrap;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: default;
+    position: relative;
+  }
+  .set-pill:hover::after {
+    content: attr(data-fullname);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.7rem;
+    padding: 5px 10px;
+    border-radius: 3px;
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .set-pill.p-primary   { color: var(--pri); border-color: #3a3d50; }
+  .set-pill.p-secondary { color: var(--sec); }
+  .set-pill.p-tertiary  { color: var(--ter); }
+  .set-pill.p-inactive  { color: var(--ter); opacity: 0.5; text-decoration: line-through; }
+
+  </style>
+</head>
+<body>
+
+<h1>Artifact Set Reference</h1>
+
+<div class="tabs">
+  <div class="tab active" data-tab="sets">Sets → Chars</div>
+  <div class="tab" data-tab="chars">Chars → Sets</div>
+</div>
+
+<div class="view active" id="view-sets">
+  <table class="set-table">
+    <thead><tr>
+      <th class="col-num">#</th>
+      <th>Set</th>
+      <th>Characters</th>
+    </tr></thead>
+    <tbody id="sets-tbody"></tbody>
+  </table>
+</div>
+
+<div class="view" id="view-chars">
+  <table class="char-table">
+    <thead><tr>
+      <th>Character</th>
+      <th>Sets</th>
+    </tr></thead>
+    <tbody id="chars-tbody"></tbody>
+  </table>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+
+const VIRTUAL_SETS = [
+  { name: "2pc ATK% sets", key: "2pc-atk" },
+  { name: "2pc HP% sets",  key: "2pc-hp"  },
+  { name: "2pc EM sets",   key: "2pc-em"  },
+  { name: "2pc ER% sets",  key: "2pc-er"  },
+];
+
+const SETS = [
+  "Gladiator's Finale","Wanderer's Troupe","Bloodstained Chivalry","Noblesse Oblige",
+  "Viridescent Venerer","Maiden Beloved","Retracing Bolide","Archaic Petra",
+  "Thundering Fury","Thundersoother","Crimson Witch of Flames","Lavawalker",
+  "Heart of Depth","Blizzard Strayer","Pale Flame","Tenacity of the Millelith",
+  "Emblem of Severed Fate","Shimenawa's Reminiscence","Ocean-Hued Clam","Husk of Opulent Dreams",
+  "Echoes of an Offering","Vermillion Hereafter","Gilded Dreams","Deepwood Memories",
+  "Flower of Paradise Lost","Desert Pavilion Chronicle","Vourukasha's Glow","Nymph's Dream",
+  "Golden Troupe","Marechaussee Hunter","Nighttime Whispers in the Echoing Woods","Song of Days Past",
+  "Unfinished Reverie","Fragment of Harmonic Whimsy","Obsidian Codex","Scroll of the Hero of Cinder City",
+  "Finale of the Deep Galleries","Long Night's Oath","Silken Moon's Serenade","Night of the Sky's Unveiling",
+  "A Day Carved From Rising Winds","Aubade of Morningstar and Moon",
+  "Celestial Gift","Disenchantment in Deep Shadow",
+];
+
+// sets where the listed chars are the only viable users
+const SETS_META = {
+  "Maiden Beloved":               { exclusive: true },
+  "Archaic Petra":                { exclusive: true },
+  "Retracing Bolide":             { exclusive: true },
+  "Thundersoother":               { exclusive: true },
+  "Bloodstained Chivalry":        { exclusive: true },
+  "Vourukasha's Glow":            { exclusive: true },
+  "Finale of the Deep Galleries": { exclusive: true },
+};
+
+const CHARS = {
+  // ── Pyro ──
+  "Hu Tao":     { element:"pyro",    sets:[{set:"Crimson Witch of Flames"},{set:"Shimenawa's Reminiscence"}] },
+  "Yanfei":     { element:"pyro",    sets:[{set:"Wanderer's Troupe"},{set:"Crimson Witch of Flames"}] },
+  "Diluc":      { element:"pyro",    sets:[{set:"Crimson Witch of Flames"}] },
+  "Klee":       { element:"pyro",    sets:[{set:"Crimson Witch of Flames"},{set:"Lavawalker"}] },
+  "Amber":      { element:"pyro",    sets:[{set:"Wanderer's Troupe"},{set:"Crimson Witch of Flames"},{set:"Noblesse Oblige"}] },
+  "Yoimiya":    { element:"pyro",    sets:[{set:"Crimson Witch of Flames"},{set:"Shimenawa's Reminiscence"},{set:"Echoes of an Offering"}] },
+  "Jiaming":    { element:"pyro",    sets:[{set:"Crimson Witch of Flames"}] },
+  "Bennett":    { element:"pyro",    sets:[{set:"Noblesse Oblige"}] },
+  "Xiangling":  { element:"pyro",    sets:[{set:"Emblem of Severed Fate"}] },
+  "Thoma":      { element:"pyro",    sets:[{set:"2pc-hp"},{set:"2pc-er"},{set:"Flower of Paradise Lost"}] },
+  "Lyney":      { element:"pyro",    sets:[{set:"Marechaussee Hunter"}] },
+  "Arlecchino": { element:"pyro",    sets:[{set:"Fragment of Harmonic Whimsy"}] },
+  "Mavuika":    { element:"pyro",    sets:[{set:"Obsidian Codex"}] },
+  "Chevreuse":  { element:"pyro",    sets:[{set:"2pc-hp"},{set:"Song of Days Past"}] },
+  "Dehya":      { element:"pyro",    sets:[{set:"Vourukasha's Glow"}] },
+  "Gaaming":    { element:"pyro",    sets:[{set:"Marechaussee Hunter"}] },
+  // ── Hydro ──
+  "Xingqiu":    { element:"hydro",   sets:[{set:"Noblesse Oblige"},{set:"Emblem of Severed Fate"}] },
+  "Ayato":      { element:"hydro",   sets:[{set:"Gladiator's Finale"},{set:"Heart of Depth"},{set:"Echoes of an Offering"},{set:"Nymph's Dream"}] },
+  "Tartaglia":  { element:"hydro",   sets:[{set:"Heart of Depth"},{set:"Nymph's Dream"}] },
+  "Yelan":      { element:"hydro",   sets:[{set:"Emblem of Severed Fate"}] },
+  "Neuvi":      { element:"hydro",   sets:[{set:"Marechaussee Hunter"}] },
+  "Barbara":    { element:"hydro",   sets:[{set:"Ocean-Hued Clam"}] },
+  "Kokomi":     { element:"hydro",   sets:[{set:"Ocean-Hued Clam"}] },
+  "Furina":     { element:"hydro",   sets:[{set:"Golden Troupe"}] },
+  "Mualani":    { element:"hydro",   sets:[{set:"Obsidian Codex"}] },
+  // ── Electro ──
+  "Raiden":     { element:"electro", sets:[{set:"Emblem of Severed Fate"}] },
+  "Fischl":     { element:"electro", sets:[{set:"Thundering Fury"},{set:"Pale Flame"},{set:"Golden Troupe"}] },
+  "Keqing":     { element:"electro", sets:[{set:"Thundering Fury"},{set:"Gilded Dreams"}] },
+  "Cyno":       { element:"electro", sets:[{set:"2pc-em"},{set:"Gladiator's Finale"},{set:"Thundering Fury"},{set:"Gilded Dreams"}] },
+  "Shinobu":    { element:"electro", sets:[{set:"2pc-em"},{set:"Tenacity of the Millelith"},{set:"Deepwood Memories"},{set:"Flower of Paradise Lost"}] },
+  "Sethos":     { element:"electro", sets:[{set:"Wanderer's Troupe"}] },
+  "Ororon":     { element:"electro", sets:[{set:"Scroll of the Hero of Cinder City"}] },
+  "Razor":      { element:"electro", sets:[{set:"Gladiator's Finale"},{set:"Pale Flame"}] },
+  "Iansan":     { element:"electro", sets:[{set:"Scroll of the Hero of Cinder City"}] },
+  // ── Cryo ──
+  "Kaeya":      { element:"cryo",    sets:[{set:"Noblesse Oblige"},{set:"Blizzard Strayer"}] },
+  "Ayaka":      { element:"cryo",    sets:[{set:"Blizzard Strayer"}] },
+  "Ganyu":      { element:"cryo",    sets:[{set:"Blizzard Strayer"},{set:"Unfinished Reverie"}] },
+  "Rosaria":    { element:"cryo",    sets:[{set:"Noblesse Oblige"},{set:"Blizzard Strayer"}] },
+  "Layla":      { element:"cryo",    sets:[{set:"2pc-hp"},{set:"Tenacity of the Millelith"}] },
+  "Qiqi":       { element:"cryo",    sets:[{set:"Ocean-Hued Clam"}] },
+  "Wrio":       { element:"cryo",    sets:[{set:"Marechaussee Hunter"},{set:"Unfinished Reverie"}] },
+  "Chongyun":   { element:"cryo",    sets:[{set:"Noblesse Oblige"}] },
+  "Citlali":    { element:"cryo",    sets:[{set:"Obsidian Codex"}] },
+  "Skirk":      { element:"cryo",    sets:[{set:"Finale of the Deep Galleries"}] },
+  // ── Anemo ──
+  "Venti":      { element:"anemo",   sets:[{set:"Viridescent Venerer"},{set:"A Day Carved From Rising Winds"}] },
+  "Sayu":       { element:"anemo",   sets:[{set:"Viridescent Venerer"}] },
+  "Sucrose":    { element:"anemo",   sets:[{set:"Viridescent Venerer"}] },
+  "Kazuha":     { element:"anemo",   sets:[{set:"Viridescent Venerer"}] },
+  "Wanderer":   { element:"anemo",   sets:[{set:"Echoes of an Offering"},{set:"Desert Pavilion Chronicle"}] },
+  "Heizou":     { element:"anemo",   sets:[{set:"Desert Pavilion Chronicle"}] },
+  "Faruzan":    { element:"anemo",   sets:[{set:"Tenacity of the Millelith"}] },
+  "Xianyun":    { element:"anemo",   sets:[{set:"Viridescent Venerer"},{set:"Song of Days Past"}] },
+  "Lynette":    { element:"anemo",   sets:[{set:"Marechaussee Hunter"}] },
+  "Chasca":     { element:"anemo",   sets:[{set:"Obsidian Codex"}] },
+  "Xiao":       { element:"anemo",   sets:[{set:"Vermillion Hereafter"}] },
+  // ── Geo ──
+  "Zhongli":    { element:"geo",     sets:[{set:"Tenacity of the Millelith"}] },
+  "Albedo":     { element:"geo",     sets:[{set:"Husk of Opulent Dreams"},{set:"Golden Troupe"}] },
+  "Itto":       { element:"geo",     sets:[{set:"Husk of Opulent Dreams"}] },
+  "Gorou":      { element:"geo",     sets:[{set:"Husk of Opulent Dreams"}] },
+  "Yun Jin":    { element:"geo",     sets:[{set:"Husk of Opulent Dreams"}] },
+  "Navia":      { element:"geo",     sets:[{set:"Nighttime Whispers in the Echoing Woods"}] },
+  "Geo MC":     { element:"geo",     sets:[{set:"Nighttime Whispers in the Echoing Woods"}] },
+  "Ningguang":  { element:"geo",     sets:[{set:"Nighttime Whispers in the Echoing Woods"}] },
+  "Kachina":    { element:"geo",     sets:[{set:"Scroll of the Hero of Cinder City"}] },
+  "Xilonen":    { element:"geo",     sets:[{set:"Scroll of the Hero of Cinder City"}] },
+  // ── Dendro ──
+  "Tighnari":   { element:"dendro",  sets:[{set:"Wanderer's Troupe"}] },
+  "Collei":     { element:"dendro",  sets:[{set:"Deepwood Memories"}] },
+  "DMC":        { element:"dendro",  sets:[{set:"Deepwood Memories"}] },
+  "Nahida":     { element:"dendro",  sets:[{set:"2pc-em"},{set:"Deepwood Memories"},{set:"Gilded Dreams"}] },
+  "Baizhu":     { element:"dendro",  sets:[{set:"Deepwood Memories"}] },
+  "Yaoyao":     { element:"dendro",  sets:[{set:"Deepwood Memories"}] },
+  "Alhaitham":  { element:"dendro",  sets:[{set:"2pc-em"},{set:"Gilded Dreams"}] },
+  "Kinich":     { element:"dendro",  sets:[{set:"Obsidian Codex"}] },
+  // ── Unknown element ──
+  "Varesa":     { element:"none",    sets:[{set:"Long Night's Oath"}] },
+  "Flins":      { element:"none",    sets:[{set:"Night of the Sky's Unveiling"}] },
+  "Nefer":      { element:"none",    sets:[{set:"Night of the Sky's Unveiling"}] },
+  "Zibai":      { element:"none",    sets:[{set:"Night of the Sky's Unveiling"}] },
+  "Aino":       { element:"none",    sets:[{set:"Silken Moon's Serenade"}] },
+  "Lauma":      { element:"none",    sets:[{set:"Silken Moon's Serenade"}] },
+  "Jahoda":     { element:"none",    sets:[{set:"Silken Moon's Serenade"}] },
+  "Columbina":  { element:"none",    sets:[{set:"Silken Moon's Serenade"},{set:"Aubade of Morningstar and Moon"}] },
+  "Illuga":     { element:"none",    sets:[{set:"Silken Moon's Serenade"}] },
+  "Ineffa":     { element:"none",    sets:[{set:"Aubade of Morningstar and Moon"}] },
+  "Durin":      { element:"none",    sets:[{set:"A Day Carved From Rising Winds"}] },
+  "Varka":      { element:"none",    sets:[{set:"A Day Carved From Rising Winds"}] },
+  "Ifa":        { element:"none",    sets:[{set:"Obsidian Codex"}] },
+};
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+
+function truncate(str, max) {
+  return str.length > max ? str.slice(0, max) + '…' : str;
+}
+
+function makeCharPill(charName, priority, note) {
+  const char = CHARS[charName];
+  const el = char ? char.element : 'none';
+  const pill = document.createElement('span');
+  pill.className = `char-pill el-${el} p-${priority}`;
+  pill.textContent = charName + (note ? '*' : '');
+  if (note) pill.dataset.note = note;
+  return pill;
+}
+
+function buildSetIndex() {
+  const idx = {};
+  SETS.forEach(s => idx[s] = []);
+  VIRTUAL_SETS.forEach(v => idx[v.key] = []);
+  Object.entries(CHARS).forEach(([charName, data]) => {
+    data.sets.forEach(entry => {
+      if (!idx[entry.set]) idx[entry.set] = [];
+      idx[entry.set].push({ charName, priority: entry.priority || 'primary', note: entry.note });
+    });
+  });
+  return idx;
+}
+
+// ══════════════════════════════════════════════
+//  RENDER: SETS VIEW
+// ══════════════════════════════════════════════
+
+function renderSets() {
+  const idx = buildSetIndex();
+  const tbody = document.getElementById('sets-tbody');
+  tbody.innerHTML = '';
+
+  VIRTUAL_SETS.forEach(v => {
+    const tr = document.createElement('tr');
+    const tdNum = document.createElement('td'); tdNum.className = 'col-num';
+    const tdSet = document.createElement('td'); tdSet.className = 'col-set virtual'; tdSet.textContent = v.name;
+    const tdChars = document.createElement('td');
+    const div = document.createElement('div'); div.className = 'col-chars';
+    (idx[v.key] || []).forEach(e => div.appendChild(makeCharPill(e.charName, e.priority, e.note)));
+    tdChars.appendChild(div);
+    tr.append(tdNum, tdSet, tdChars);
+    tbody.appendChild(tr);
+  });
+
+  SETS.forEach((setName, i) => {
+    const tr = document.createElement('tr');
+    const tdNum = document.createElement('td'); tdNum.className = 'col-num'; tdNum.textContent = i + 1;
+    const tdSet = document.createElement('td'); tdSet.className = 'col-set'; tdSet.textContent = setName;
+    const tdChars = document.createElement('td');
+    const div = document.createElement('div'); div.className = 'col-chars';
+    (idx[setName] || []).forEach(e => div.appendChild(makeCharPill(e.charName, e.priority, e.note)));
+    if (SETS_META[setName]?.exclusive) {
+      const marker = document.createElement('span');
+      marker.className = 'exclusive-marker';
+      marker.textContent = '||';
+      div.appendChild(marker);
+    }
+    tdChars.appendChild(div);
+    tr.append(tdNum, tdSet, tdChars);
+    tbody.appendChild(tr);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  RENDER: CHARS VIEW
+// ══════════════════════════════════════════════
+
+function renderChars() {
+  const tbody = document.getElementById('chars-tbody');
+  tbody.innerHTML = '';
+  const MAX = 16;
+
+  Object.entries(CHARS).forEach(([charName, data]) => {
+    const tr = document.createElement('tr');
+    const tdName = document.createElement('td'); tdName.className = 'col-charname'; tdName.textContent = charName;
+    const tdSets = document.createElement('td');
+    const div = document.createElement('div'); div.className = 'col-sets';
+
+    data.sets.forEach(entry => {
+      const virtual = VIRTUAL_SETS.find(v => v.key === entry.set);
+      const fullName = virtual ? virtual.name : entry.set;
+      const pill = document.createElement('span');
+      pill.className = `set-pill p-${entry.priority || 'primary'}`;
+      pill.textContent = truncate(fullName, MAX);
+      pill.dataset.fullname = fullName + (entry.note ? ' — ' + entry.note : '');
+      div.appendChild(pill);
+    });
+
+    tdSets.appendChild(div);
+    tr.append(tdName, tdSets);
+    tbody.appendChild(tr);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('view-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+renderSets();
+renderChars();
+</script>
+
+</body>
+</html>
