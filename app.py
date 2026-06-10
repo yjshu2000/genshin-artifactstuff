@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, jsonify
+from flask import Flask, render_template, jsonify
 import json, pathlib
 
 app = Flask(__name__)
@@ -7,7 +7,7 @@ DATA = json.loads((ROOT / "data.json").read_text(encoding="utf-8"))
 
 @app.route("/")
 def index():
-    return send_from_directory(ROOT, "setview.html")
+    return render_template("setview.html")
 
 @app.route("/data.json")
 def data():
